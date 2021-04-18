@@ -10,7 +10,6 @@ import random
 import structured_learning
 from NewOffloadEnv import OffloadEnv
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
-import utils
 import pickle
 from stable_baselines3.common.cmd_util import make_vec_env
 import matplotlib.pyplot as plt
@@ -169,9 +168,9 @@ if __name__ == "__main__":
         #torch.manual_seed(j)
         np.random.seed(j)
         if args.algo != 4:
-            with open (f"../inop_new/{args.folder}/buffers/lambda.npy", "rb") as fp:
+            with open (f"../inop_salmut/{args.folder}/buffers/lambda.npy", "rb") as fp:
                 lambd = pickle.load(fp)
-            with open (f"../inop_new/{args.folder}/buffers/N.npy", "rb") as fp:
+            with open (f"../inop_salmut/{args.folder}/buffers/N.npy", "rb") as fp:
                 N = pickle.load(fp)
         if args.algo == 0:
             model = PPO('MlpPolicy', env, verbose=0, gamma=0.95, n_steps=1000, tensorboard_log=log_dir)

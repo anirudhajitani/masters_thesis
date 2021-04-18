@@ -389,9 +389,9 @@ if __name__ == "__main__":
     #eval_env = make_vec_env(lambda: eval_env, n_envs=1)
     #callback = SaveOnBestTrainingRewardCallback(check_freq=10, log_dir=log_dir)
     loop_range = int(args.train_iter / args.eval_freq)
-    with open (f"../inop_new/{args.folder}/buffers/lambda.npy", "rb") as fp:
+    with open (f"../inop_salmut/{args.folder}/buffers/lambda.npy", "rb") as fp:
         lambd = pickle.load(fp)
-    with open (f"../inop_new/{args.folder}/buffers/N.npy", "rb") as fp:
+    with open (f"../inop_salmut/{args.folder}/buffers/N.npy", "rb") as fp:
         N = pickle.load(fp)
     
     obs = env.reset()
@@ -400,8 +400,8 @@ if __name__ == "__main__":
     for i in range(start_loop, end_loop):
         env.set_N(int(N[i]), list(lambd[i]))
         if args.algo == 0:
-                if os.path.isfile(f"../inop_new/policies/policy_plan_lambd_{sum(lambd[i])}.npy"):
-                    policy = np.load(f"../inop_new/policies/policy_plan_lambd_{sum(lambd[i])}.npy")
+                if os.path.isfile(f"../inop_salmut/policies/policy_plan_lambd_{sum(lambd[i])}.npy"):
+                    policy = np.load(f"../inop_salmut/policies/policy_plan_lambd_{sum(lambd[i])}.npy")
                     #print (policy, policy.shape)
                 else:
                     pol = PlanPolicy(N[i], lambd[i], args.overload_cost, args.offload_cost, args.holding_cost, args.reward, gamma=gamma)

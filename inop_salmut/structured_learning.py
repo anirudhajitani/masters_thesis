@@ -129,8 +129,8 @@ class structured_learning(object):
         self.beta_1 = 0.9
         self.beta_2 = 0.99
 
-        print("SLOW LR, FAST LR, FIXED STATE ", self.step_size_slow,
-              self.step_size_fast, self.fixed_state)
+        print("SLOW LR, FAST LR ", self.step_size_slow,
+              self.step_size_fast)
 
     def set_threshold_vec(self, thres):
         # Set threshold vector (aka policy)

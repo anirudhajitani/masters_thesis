@@ -57,9 +57,9 @@ class PlanPolicy():
         """
         Calculating transition probability matrix
         """
-        #prob_1 -> when departure, the probability of resource change
-        #prob_2 -> when arrival and accept, the probability of resource change
-        #prob_3 -> when arrival and offload, the probability of resource change
+        # prob_1 -> when departure, the probability of resource change
+        # prob_2 -> when arrival and accept, the probability of resource change
+        # prob_3 -> when arrival and offload, the probability of resource change
         prob_1 = self.prob_1
         prob_2 = self.prob_2
         prob_3 = self.prob_3
@@ -102,10 +102,12 @@ class PlanPolicy():
                 state_i = [i, j]
                 state_j = [i, j]
                 state_k = [max(i-1, 0), j]
-                self.P[self.encode(state_i), 1, self.encode(state_j)] += prob * prob_3
-                self.P[self.encode(state_i), 1, self.encode(state_k)] += prob * (1 - prob_3)
+                self.P[self.encode(state_i), 1, self.encode(
+                    state_j)] += prob * prob_3
+                self.P[self.encode(state_i), 1, self.encode(
+                    state_k)] += prob * (1 - prob_3)
 
-	"""" 
+        """" 
         print ("Transition Matrix ", self.P)
         for i in range(self.N_STATES):
             for j in range(self.N_ACTIONS):

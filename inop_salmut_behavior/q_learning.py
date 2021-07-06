@@ -87,7 +87,7 @@ class structured_learning(object):
         # Initialize state counts and value functions and request thresholds
         self.state_counts = np.ones((441,2), dtype=int)
         self.val_fn = np.zeros((441,2), dtype=float)
-        self.req_thres = np.full((21), threshold_req, dtype=float)
+        #self.req_thres = np.full((21), threshold_req, dtype=float)
 
         # Determine network type
         # self.Q = Conv_Q(state_dim[0], num_actions).to(self.device) if is_atari else FC_Q(state_dim, num_actions).to(self.device)
@@ -136,6 +136,11 @@ class structured_learning(object):
         self.req_thres = thres
         #print ("Thres vec : ", self.req_thres)
 
+    def set_val_fn(self, val_fn):
+        # Set threshold vector (aka policy)
+        self.val_fn = val_fn
+        #print ("Thres vec : ", self.req_thres)
+    
     def encode(self, state):
         # State encoding
         return (state[0] * 21) + (state[1])
@@ -195,7 +200,7 @@ class structured_learning(object):
         """
         en_state = int(self.encode(state))
         if np.random.uniform(0, 1) > self.eval_eps or eval_ == True:
-            action = self.sigmoid_fn(state)
+            action = np.argmax(self.val_fn[en_state]) 
         else:
             action = np.random.randint(self.num_actions)
         self.state_counts[en_state, action] += 1
@@ -212,7 +217,7 @@ class structured_learning(object):
             if self.req_thres[i] > req_thres:
                 self.req_thres[i] = req_thres
 
-    def train(self, state, action, reward, next_state, eval_freq, env_name, folder, j):
+    def train(self, state, action, reward, next_state, eval_freq, env_name, folder, j, i):
         """
         SALMUT Training method
         """
@@ -249,13 +254,14 @@ class structured_learning(object):
         #        self.val_fn[en_next_state, 1]) - self.val_fn[en_state, action]
         g = reward + self.discount * max(self.val_fn[en_next_state, 0], self.val_fn[en_next_state, 1]) - self.val_fn[en_state, action]
         # Value function update
-        val_update = self.adam_lr(
-            self.val_fn[en_state, action], g, self.step_size_fast, self.state_counts[en_state, action])
-        self.val_fn[en_state, action] = val_update
+        #val_update = self.adam_lr(
+        #    self.val_fn[en_state, action], g, self.step_size_fast, self.state_counts[en_state, action])
+        self.val_fn[en_state, action] = (1 - 0.005) * self.val_fn[en_state, action] + 0.005 * g
         if debug:
             print("Value fn after, Action, g", en_state,
                   self.val_fn[en_state, action], action, g)
-
+        
+        """
         # Updating threshold values mul is derivative of sigmoid function
         # Should ideally multiply by -1, hence make g as -ve
         # Derivative of sigmoid function
@@ -267,8 +273,7 @@ class structured_learning(object):
             print("Thres before : , mul",
                   state[1], self.req_thres[int(state[0])], mul)
         # Policy Update
-        #g = math.pow(-1, 1-action) * mul * (reward + self.discount * max(self.val_fn[en_next_state, 0], self.val_fn[en_next_state, 1]))
-        g = mul * (self.val_fn[en_state, 0] - self.val_fn[en_state, 1])
+        g = math.pow(-1, 1-action) * mul * (reward + self.discount * max(self.val_fn[en_next_state, 0], self.val_fn[en_next_state, 1]))
         #  max(self.val_fn[en_next_state, 0], self.val_fn[en_next_state, 1]))
         # Update threshold (bound in 0 and 20)
         self.req_thres[int(state[0])] = min(max(self.adam_lr(self.req_thres[int(
@@ -278,14 +283,15 @@ class structured_learning(object):
                 state[0])], " Action ", action, " g = ", g)
         # Projection operation
         #self.projection(int(state[0]))
-
+        """
         # If iterations == eval frequency (save the parameters in disk)
         if self.iterations % eval_freq == 0:
-            print("CPU thres", self.req_thres)
-            self.thres_vec.append(list(self.req_thres))
+            #print("CPU thres", self.req_thres)
+            #self.thres_vec.append(list(self.val_fn).copy())
             #print("CPU thres vec", self.thres_vec)
             # print(f"./{folder}/buffers/{env_name}_thresvec_{j}.npy")
-            np.save(f"./{folder}/buffers/thresvec_{env_name}_{j}.npy", self.thres_vec)
-            np.save(f"./{folder}/buffers/val_fn_{env_name}_{j}.npy", self.val_fn)
+            #np.save(f"./{folder}/buffers/thresvec_{env_name}_{j}.npy", self.thres_vec)
+            #print(to_add_val_fn)
+            np.save(f"./{folder}/buffers/val_fn_{env_name}_{j}_{i}.npy", self.val_fn)
             #print("VAL", self.val_fn)
             #print("State counts :", self.state_counts)

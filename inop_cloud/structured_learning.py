@@ -96,7 +96,7 @@ class structured_learning(object):
         self.discount = discount
         self.thres_vec = []
         # Target update rule
-        self.maybe_update_target = self.polyak_target_update if polyak_target_update else self.copy_target_update
+        #self.maybe_update_target = self.polyak_target_update if polyak_target_update else self.copy_target_update
         self.target_update_frequency = target_update_frequency
         self.tau = tau
 
@@ -303,7 +303,8 @@ class structured_learning(object):
             # didnt make mul -ve as math.pow is supposed to be +ve for alpha = 1 but here its opposite
             #g = 1 * mul * math.pow(-1, action) * (reward + self.discount * max(self.val_fn[en_next_state, 0], self.val_fn[en_next_state, 1]))
             #g = math.pow(-1, 1-action) * mul * (reward + self.discount * self.val_fn[en_next_state]) 
-            g = math.pow(-1, 1-action) * mul * (reward + self.discount * max(self.val_fn[en_next_state, 0], self.val_fn[en_next_state, 1]))
+            #g = math.pow(-1, 1-action) * mul * (reward + self.discount * max(self.val_fn[en_next_state, 0], self.val_fn[en_next_state, 1]))
+            g = mul * (self.val_fn[en_state, 0] - self.val_fn[en_state, 1])
             # if g > 0:
             #    print ("POSITIVE ", action)
             # else:

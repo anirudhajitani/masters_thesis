@@ -51,7 +51,7 @@ if __name__ == "__main__":
     parser.add_argument("--max_timesteps", default=1e6, type=int)
     # Algo 0-DP 1-Baseline 2-Parameter Estimation
     parser.add_argument("--algo", default=0, type=int)
-    parser.add_argument("--baseline-threshold", default=18, type=int)
+    parser.add_argument("--baseline-threshold", default=17, type=int)
     parser.add_argument("--env_name", default="plan_res_try_env")
     parser.add_argument("--logdir", default="plan_res_try_log")
     parser.add_argument("--lambd", default=0.5, type=float)

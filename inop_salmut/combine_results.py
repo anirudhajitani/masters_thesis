@@ -9,8 +9,8 @@ if len(sys.argv) < 3:
     exit(1)
 folder = sys.argv[1]
 algo = sys.argv[2]
-if algo != 'salmut':
-    algo = algo + '_eval'
+#if algo != 'salmut' or algo != 'q_learning':
+#    algo = algo + '_eval'
 os.chdir(f"./{folder}/results")
 #file_list = glob.glob('median_*_*_salmut_20.npy')
 file_list = glob.glob(f'median_*_*_{algo}_20.npy')

@@ -8,6 +8,7 @@ import numpy as np
 import torch
 import random
 import structured_learning
+import q_learning 
 from NewOffloadEnv import OffloadEnv
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
 import utils
@@ -74,6 +75,31 @@ def train_salmut(env, policy, steps, args, state, j):
         policy.train(prev_state, action, reward, state,
                      args.eval_freq, args.env_name, args.folder, j)
     return state
+
+def train_q_learning(env, policy, steps, args, state, j, i):
+    # For saving files
+    setting = f"{args.env_name}_{j}"
+    training_eval = []
+    episode_num = 0
+    avg_reward = 0.0
+    done = True
+    training_iters = 0
+    #state = env.reset()
+    for _ in range(int(args.eval_freq)):
+        action = policy.select_action(state)
+        prev_state = state
+        state, reward, done, _ = env.step(action)
+        avg_reward += reward
+        # Current implementation never sets done to False, we can convert this to episodic
+        # task by setting this to True once episode ends and computing training rewards too.
+        if done:
+            training_eval.append(avg_reward)
+            avg_reward = 0.0
+            np.save(f"./{args.folder}/results/q_learning_train_{setting}", training_eval)
+        policy.train(prev_state, action, reward, state,
+                     args.eval_freq, args.env_name, args.folder, j, i)
+    return state
+
 
 
 # Runs policy for X episodes and returns average reward
@@ -261,8 +287,7 @@ if __name__ == "__main__":
             model = A2C('MlpPolicy', env, verbose=0, gamma=0.95,
                         learning_rate=args.lr, n_steps=args.n_steps, tensorboard_log=log_dir)
         elif args.algo == 2:
-            model = SAC('MlpPolicy', env, verbose=0,
-                        gamma=0.95, tensorboard_log=log_dir)
+            model = q_learning.q_learning(num_actions, state_dim)
         elif args.algo == 3:
             # Initialize SALMUT
             model = structured_learning.structured_learning(num_actions, state_dim)
@@ -332,7 +357,7 @@ if __name__ == "__main__":
                 env.set_N(int(N[i]), list(lambd[i]))
 
             # For RL algos except SALMUT, start training using stable-baselines API
-            if args.algo != 3 and args.algo != 4:
+            if args.algo != 3 and args.algo != 4 and args.algo != 2:
                 model.learn(total_timesteps=args.eval_freq, log_interval=10,
                             reset_num_timesteps=False)
                 # Saving models intermittently
@@ -345,7 +370,8 @@ if __name__ == "__main__":
             elif args.algo == 1:
                 model = A2C.load(model_name, env)
             elif args.algo == 2:
-                model = SAC.load(model_name, env)
+                state = train_q_learning(
+                    env, model, args.eval_freq, args, state, j, i)
             elif args.algo == 3:
                 # Training SALMUT
                 state = train_salmut(

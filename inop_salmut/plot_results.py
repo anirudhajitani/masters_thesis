@@ -4,6 +4,7 @@ import sys
 import os
 import pickle
 from collections import OrderedDict
+from scipy.signal import savgol_filter
 
 if len(sys.argv) < 2:
     print("Provide folder name")
@@ -24,6 +25,7 @@ os.chdir(f"../results")
 y1 = np.load('median_final_ppo_eval_20.npy')
 y2 = np.load('median_final_a2c_eval_20.npy')
 y3 = np.load('median_final_salmut_20.npy')
+y6 = np.load('median_final_q_learning_20.npy')
 y4 = np.load('median_plan_eval_20.npy')
 y5 = np.load('median_thres_eval_20.npy')
 #y6 = np.load('median_mpc_eval_20.npy')
@@ -44,6 +46,9 @@ off3 = np.load('offload_med_salmut.npy')
 off4 = np.load('offload_med_plan_eval.npy')
 off5 = np.load('offload_med_thres_eval.npy')
 """
+y6[:, 0] = savgol_filter(y6[:, 0], 13, 4)
+y6[:, 1] = savgol_filter(y6[:, 1], 13, 4)
+y6[:, 2] = savgol_filter(y6[:, 2], 13, 4)
 
 fig, ax = plt.subplots(figsize=(7, 4.2))
 ax.plot(x, -y5[:, 1], '#f781bf', label='Baseline')
@@ -52,6 +57,8 @@ ax.plot(x, -y2[:, 1], '#ff7f00', label='A2C')
 ax.fill_between(x, -y2[:, 2], -y2[:, 0], color='#ff7f00', alpha=0.2)
 ax.plot(x, -y1[:, 1], '#4daf4a', label='PPO')
 ax.fill_between(x, -y1[:, 2], -y1[:, 0], color='#4daf4a', alpha=0.2)
+ax.plot(x, -y6[:, 1], '#653700', label='QL')
+ax.fill_between(x, -y6[:, 2], -y6[:, 0], color='#653700', alpha=0.2)
 ax.plot(x, -y4[:, 1], '#e41a1c', label='DP')
 ax.fill_between(x, -y4[:, 2], -y4[:, 0], color='#e41a1c', alpha=0.2)
 ax.plot(x, -y3[:, 1], '#377eb8', label='SALMUT')
@@ -68,9 +75,9 @@ print(labels, handles)
 ax.set_xlabel('Timesteps', fontsize=14)
 ax.set_ylabel('Discounted Total Cost', fontsize=14)
 # plt.legend(loc='best')
-plt.ylim(13, 57)
-ax.legend(labels, handles, bbox_to_anchor=(0., 1.02, 1., .102), prop={'size': 12}, loc='upper center',
-          ncol=5, mode="expand", borderaxespad=0.)
+plt.ylim(12, 40)
+ax.legend(labels, handles, bbox_to_anchor=(0., 1.02, 1., .102), loc='upper center',
+          ncol=6, mode="expand", borderaxespad=0.)
 
 """
 ax2=ax.twinx()

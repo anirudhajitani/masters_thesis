@@ -11,7 +11,6 @@ import structured_learning
 from NewOffloadEnv import OffloadEnv
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
 from plan_policy_new_debug import PlanPolicy
-import utils
 import pickle
 from stable_baselines3.common.cmd_util import make_vec_env
 import matplotlib.pyplot as plt
@@ -314,7 +313,7 @@ if __name__ == "__main__":
     parser.add_argument("--generate_buffer", action="store_true")
     # Algo 0-PPO 1-A2C 2-SAC
     parser.add_argument("--algo", default=0, type=int)
-    parser.add_argument("--baseline-threshold", default=18, type=int)
+    parser.add_argument("--baseline-threshold", default=17, type=int)
     parser.add_argument("--env_name", default="plan_res_try_env")
     parser.add_argument("--logdir", default="plan_res_try_log")
     parser.add_argument("--lambd", default=2.0, type=float)

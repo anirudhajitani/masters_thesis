@@ -8,6 +8,7 @@ import numpy as np
 import torch
 import random
 import structured_learning
+import q_learning 
 from NewOffloadEnv import OffloadEnv
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
 import utils
@@ -193,6 +194,9 @@ if __name__ == "__main__":
         model = structured_learning.structured_learning(num_actions, state_dim)
     #env_name = "offload_dqn_mdp_5"
 
+    if args.algo == 2:
+        model = q_learning.q_learning(num_actions, state_dim)
+    
     # Initializing variables
     env_name = args.env_name
     setting = f"{env_name}_{args.seed}"
@@ -242,7 +246,9 @@ if __name__ == "__main__":
             elif args.algo == 1:
                 model = A2C.load(model_name, env)
             elif args.algo == 2:
-                model = SAC.load(model_name, env)
+                val_fn = np.load(f"./{args.folder}/buffers/val_fn_{args.env_name}_{j}_{i}.npy")
+                # Setting the threshold vectors for SALMUT
+                model.set_val_fn(val_fn)
             elif args.algo == 3:
                 # For SALMUT we load the threshold vector policies
                 thres_vec = np.load(f"./{args.folder}/buffers/thresvec_{args.env_name}_{j}.npy")
@@ -258,7 +264,7 @@ if __name__ == "__main__":
                 dis_reward = 0.0
                 # We fix each step to 1000 iterations
                 for t in range(int(1e3)):
-                    if args.algo == 3:
+                    if args.algo == 3 or args.algo == 2:
                         # For SALMUT this gives us the action
                         action = model.select_action(np.array(obs), eval_=True)
                     else:

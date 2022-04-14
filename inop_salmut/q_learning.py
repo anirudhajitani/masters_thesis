@@ -54,7 +54,7 @@ class FC_Q(nn.Module):
         return self.q3(q), F.log_softmax(i, dim=1), i
 
 
-class structured_learning(object):
+class q_learning(object):
     def __init__(
             self,
             num_actions,

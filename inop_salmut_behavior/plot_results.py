@@ -26,6 +26,8 @@ ppo_ov = []
 ppo_off = []
 salmut_ov = []
 salmut_off = []
+q_learning_ov = []
+q_learning_off = []
 
 for i in range(10):
     a2c_ov.append(np.load(f'overload_med_a2c_{i}.npy'))
@@ -34,6 +36,8 @@ for i in range(10):
     ppo_off.append(np.load(f'offload_med_ppo_{i}.npy'))
     salmut_ov.append(np.load(f'overload_med_salmut_{i}.npy'))
     salmut_off.append(np.load(f'offload_med_salmut_{i}.npy'))
+    q_learning_ov.append(np.load(f'overload_med_q_learning_{i}.npy'))
+    q_learning_off.append(np.load(f'offload_med_q_learning_{i}.npy'))
 
 print (len(a2c_ov), len(a2c_off), type(a2c_ov), type(a2c_off))
 a2c_ov_med = np.array(np.percentile(a2c_ov, [25, 50, 75], axis=0))
@@ -43,6 +47,8 @@ ppo_ov_med = np.array(np.percentile(ppo_ov, [25, 50, 75], axis=0))
 ppo_off_med = np.array(np.percentile(ppo_off, [25, 50, 75], axis=0))
 salmut_ov_med = np.array(np.percentile(salmut_ov, [25, 50, 75], axis=0))
 salmut_off_med = np.array(np.percentile(salmut_off, [25, 50, 75], axis=0))
+q_learning_ov_med = np.array(np.percentile(q_learning_ov, [25, 50, 75], axis=0))
+q_learning_off_med = np.array(np.percentile(q_learning_off, [25, 50, 75], axis=0))
 plan_ov = np.load('overload_med_plan_eval_20.npy')
 plan_off = np.load('offload_med_plan_eval_20.npy')
 thres_ov = np.load('overload_med_thres_eval_20.npy')
@@ -54,6 +60,8 @@ np.save('overload_med_ppo_combined.npy', ppo_ov_med)
 np.save('offload_med_ppo_combined.npy', ppo_off_med)
 np.save('overload_med_salmut_combined.npy', salmut_ov_med)
 np.save('offload_med_salmut_combined.npy', salmut_off_med)
+np.save('overload_med_q_learning_combined.npy', salmut_ov_med)
+np.save('offload_med_q_learning_combined.npy', salmut_off_med)
 
 x = [i*1000 for i in range(0, 1000)]
 
@@ -63,6 +71,8 @@ ppo_ov_med = savgol_filter(ppo_ov_med, 21, 4) # window size 51, polynomial order
 ppo_off_med = savgol_filter(ppo_off_med, 21, 4) # window size 51, polynomial order 3
 salmut_ov_med = savgol_filter(salmut_ov_med, 21, 4) # window size 51, polynomial order 3
 salmut_off_med = savgol_filter(salmut_off_med, 21, 4) # window size 51, polynomial order 3
+q_learning_ov_med = savgol_filter(q_learning_ov_med, 21, 4) # window size 51, polynomial order 3
+q_learning_off_med = savgol_filter(q_learning_off_med, 21, 4) # window size 51, polynomial order 3
 plan_ov = savgol_filter(plan_ov, 21, 4) # window size 51, polynomial order 3
 plan_off = savgol_filter(plan_off, 21, 4) # window size 51, polynomial order 3
 thres_ov = savgol_filter(thres_ov, 21, 4) # window size 51, polynomial order 3
@@ -75,6 +85,8 @@ ax.plot(x, a2c_ov_med[1,:], '#ff7f00', label='A2C')
 ax.fill_between(x, a2c_ov_med[0,:], a2c_ov_med[2,:], color='#ff7f00', alpha=0.2)
 ax.plot(x, ppo_ov_med[1,:], '#4daf4a', label='PPO')
 ax.fill_between(x, ppo_ov_med[0,:], ppo_ov_med[2,:], color='#4daf4a', alpha=0.2)
+ax.plot(x, q_learning_ov_med[1,:], '#653700', label='QL')
+ax.fill_between(x, q_learning_ov_med[0,:], q_learning_ov_med[2,:], color='#653700', alpha=0.2)
 ax.plot(x, plan_ov, '#e41a1c', label='DP')
 ax.plot(x, salmut_ov_med[1,:], '#377eb8', label='SALMUT')
 ax.fill_between(x, salmut_ov_med[0,:], salmut_ov_med[2,:], color='#377eb8', alpha=0.2)
@@ -88,11 +100,11 @@ labels[0], labels[1] = labels[1], labels[0]
 handles[0], handles[1] = handles[1], handles[0]
 ax.set_xlabel('Timesteps')
 ax.set_ylabel('Overloaded States')
-ax.set_ylim(ymin=0, ymax=300)
+ax.set_ylim(ymin=0, ymax=100)
 #plt.legend(loc='best')
 plt.legend(labels, handles, bbox_to_anchor=(0., 1.02, 1., .102), loc='upper center',
-                   ncol=5, mode="expand", borderaxespad=0.)
-fig.savefig(f"{folder}_overload_new.png")
+                   ncol=6, mode="expand", borderaxespad=0.)
+fig.savefig(f"{folder}_overload.png")
 
 fig, ax = plt.subplots(figsize=(7,4))
 ax.plot(x, thres_off, '#f781bf', label='Baseline')
@@ -100,6 +112,8 @@ ax.plot(x, a2c_off_med[1,:], '#ff7f00', label='A2C')
 ax.fill_between(x, a2c_off_med[0,:], a2c_off_med[2,:], color='#ff7f00', alpha=0.2)
 ax.plot(x, ppo_off_med[1,:], '#4daf4a', label='PPO')
 ax.fill_between(x, ppo_off_med[0,:], ppo_off_med[2,:], color='#4daf4a', alpha=0.2)
+ax.plot(x, q_learning_off_med[1,:], '#653700', label='QL')
+ax.fill_between(x, q_learning_off_med[0,:], q_learning_off_med[2,:], color='#653700', alpha=0.2)
 ax.plot(x, plan_off, '#e41a1c', label='DP')
 ax.plot(x, salmut_off_med[1,:], '#377eb8', label='SALMUT')
 ax.fill_between(x, salmut_off_med[0,:], salmut_off_med[2,:], color='#377eb8', alpha=0.2)
